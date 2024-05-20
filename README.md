@@ -11,13 +11,9 @@ from linebot.models import *
 #======python的函數庫==========
 import tempfile, os
 import datetime
-#import openai
 import time
 import traceback
 #======python的函數庫==========
-
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.language.questionanswering import QuestionAnsweringClient
 
 app = Flask(__name__)
 static_tmp_path = os.path.join(os.path.dirname(__file__), 'static', 'tmp')
@@ -25,17 +21,6 @@ static_tmp_path = os.path.join(os.path.dirname(__file__), 'static', 'tmp')
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 # Channel Secret
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
-# OPENAI API Key初始化設定
-#openai.api_key = os.getenv('OPENAI_API_KEY')
-
-
-#def GPT_response(text):
-    # 接收回應
-    #response = openai.Completion.create(model="gpt-3.5-turbo-instruct", prompt=text, temperature=0.5, max_tokens=500)
-    #print(response)
-    # 重組回應
-    #answer = response['choices'][0]['text'].replace('。','')
-    #return answer
 
 def QA_response(text):
     client = QuestionAnsweringClient(endpoint, credential)
@@ -68,15 +53,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     msg = event.message.text
-    if msg[0]=='-':
-        try:
-            QA_answer = QA_response(msg)
-            print(QA_answer)
-            if QA_answer!='No good match found in KB':
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(QA_answer))
-        except:
-            print(traceback.format_exc())
-            line_bot_api.reply_message(event.reply_token, TextSendMessage('QA Error'))
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(msg))
          
 
 @handler.add(PostbackEvent)
